@@ -75,7 +75,7 @@ class TFLiteHelper(private val application: Application) {
     /**
      * The output tensor for bounding box predictions.
      */
-    private var outputTensors: List<TensorBuffer> = emptyList()
+    private var outputTensors: Map<String, TensorBuffer> = emptyMap()
 
     /**
      * Utility object for bitmap-to-buffer preprocessing operations.
@@ -119,11 +119,12 @@ class TFLiteHelper(private val application: Application) {
         inputBuffer = TensorBuffer.createFixedSize(inputShape, inputType)
 
         // Output tensors configuration (assumes 2 outputs).
-        outputTensors = List(2) { i ->
+        outputTensors = (0 until model.outputTensorCount).associate { i ->
             val outputTensor = model.getOutputTensor(i)
-            val outputShape = outputTensor.shape() ?: return false
-            val outputType = outputTensor.dataType() ?: return false
-            TensorBuffer.createFixedSize(outputShape, outputType)
+            val name = outputTensor.name() ?: return false
+            val shape = outputTensor.shape() ?: return false
+            val type = outputTensor.dataType() ?: return false
+            name to TensorBuffer.createFixedSize(shape, type)
         }
 
         interpreter = model
@@ -202,8 +203,8 @@ class TFLiteHelper(private val application: Application) {
     fun inference(bitmap: Bitmap, threshold: Float = 0.5f): List<DetectionResult> {
         runModel(bitmap) ?: return emptyList()
 
-        val boxes = outputTensors[1]
-        val classes = outputTensors[0]
+        val boxes = outputTensors["PartitionedCall:0"] ?: return emptyList()
+        val classes = outputTensors["PartitionedCall:1"] ?: return emptyList()
 
         val boxArray = boxes.floatArray
         val classArray = classes.floatArray
@@ -265,7 +266,9 @@ class TFLiteHelper(private val application: Application) {
             inputTensor?.load(inputBuffer)
 
             val inputs = arrayOf(inputTensor?.buffer)
-            val outputs = outputTensors.indices.associateWith { outputTensors[it].buffer }
+            val outputs = outputTensors.entries.withIndex().associate { (index, entry) ->
+                index to entry.value.buffer
+            }
 
             interpreter?.runForMultipleInputsOutputs(inputs, outputs)
 
@@ -458,7 +461,7 @@ class TFLiteHelper(private val application: Application) {
         inputTensorHWC = IntArray(0)
         inputTensor = null
         inputBuffer = null
-        outputTensors = emptyList()
+        outputTensors = emptyMap()
     }
 
 }

@@ -82,6 +82,18 @@ class TFLiteHelper(private val application: Application) {
      */
     private val bitmapUtility = BitmapUtility()
 
+    companion object {
+
+        /**
+         * Names of the output layers.
+         */
+        private val OUTPUT_LAYERS = arrayOf(
+            arrayOf("PartitionedCall:0", "PartitionedCall:1"),
+            arrayOf("StatefulPartitionedCall:0", "StatefulPartitionedCall:1"),
+        )
+
+    }
+
     /**
      * Loads the selected TensorFlow Lite model and prepares the interpreter for inference.
      *
@@ -203,8 +215,9 @@ class TFLiteHelper(private val application: Application) {
     fun inference(bitmap: Bitmap, threshold: Float = 0.5f): List<DetectionResult> {
         runModel(bitmap) ?: return emptyList()
 
-        val boxes = outputTensors["PartitionedCall:0"] ?: return emptyList()
-        val classes = outputTensors["PartitionedCall:1"] ?: return emptyList()
+        val outputLayers = getOutputLayers()
+        val boxes = outputTensors[outputLayers[0]] ?: return emptyList()
+        val classes = outputTensors[outputLayers[1]] ?: return emptyList()
 
         val boxArray = boxes.floatArray
         val classArray = classes.floatArray
@@ -438,6 +451,16 @@ class TFLiteHelper(private val application: Application) {
      * @return The height dimension, or `0` if the tensor shape is not properly initialized.
      */
     private fun getInputHeight() = inputTensorHWC.getOrNull(2) ?: 0
+
+    /**
+     * Returns the output layer names associated with the currently selected model.
+     *
+     * This uses the [selectedModel]'s [ModelType.index] property to select the correct set of
+     * output layer names from the predefined [OUTPUT_LAYERS] list.
+     *
+     * @return An array of output layer names for the selected model.
+     */
+    private fun getOutputLayers() = OUTPUT_LAYERS[selectedModel.index]
 
     /**
      * Returns the class index-to-label mapping for the currently selected model.

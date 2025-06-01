@@ -63,17 +63,17 @@ enum class ModelType(
     /**
      * YOLO-hagRID model with full precision (FP32).
      */
-    YOLO_HAGRID_FP32("YOLO hagRID (FP32)", "yolo_hagRID_fp32.dlc", "center", 1),
+    YOLO_HAGRID_FP32("YOLO hagRID (FP32)", "yolo_hagRID_float32.tflite", "center", 1),
 
     /**
-     * YOLO-hagRID model with 8-bit integer quantization (INT8).
+     * YOLO-hagRID model with 16-bit integer quantization (FP16).
      */
-    YOLO_HAGRID_INT8("YOLO hagRID (INT8)", "yolo_hagRID_int8.dlc", "center", 1),
+    YOLO_HAGRID_INT8("YOLO hagRID (FP16)", "yolo_hagRID_float16.tflite", "center", 1),
 
     /**
-     * YOLO-hagRID model optimized for HTP with INT8 precision.
+     * YOLO-hagRID model optimized for NNAPI with INT8 precision.
      */
-    YOLO_HAGRID_INT8_HTP("YOLO hagRID (INT8+HTP)", "yolo_hagRID_int8_htp_sm7325.dlc", "center", 1);
+    YOLO_HAGRID_INT8_HTP("YOLO hagRID (INT8)", "yolo_hagRID_int8.tflite", "center", 1);
 
     companion object {
 

@@ -65,3 +65,7 @@ Contributions are welcome! Please open issues or submit pull requests for improv
 ## License
 
 This project is licensed under the terms of the LICENSE file in this repository.
+
+---
+
+**Authors:** Fabricio Batista Narcizo, Elizabete Munzlinger, Sai Narsi Reddy Donthi Reddy, and Shan Ahmed Shaffi.
